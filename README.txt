@@ -23,6 +23,10 @@ Congratulations, you've just installed 404 Notifier.
 
 == Frequently Asked Questions ==  
 
+= Does this work with ugly (?p=123) permalinks? =
+
+No, this only works if you use pretty permalinks (/2006/01/01/post-name or similar). From what I can tell, the WordPress code doesn't flag URLs as 404s with ugly permalinks.
+
 = Anything else? =
 
 That about does it - enjoy!
