@@ -4,12 +4,12 @@
 Plugin Name: 404 Notifier
 Plugin URI: http://alexking.org/projects/wordpress
 Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events. Adjust your settings <a href="options-general.php?page=404-notifier.php">here</a>.
-Version: 1.0
+Version: 1.1
 Author: Alex King
 Author URI: http://alexking.org
 */ 
 
-// Copyright (c) 2006 Alex King. All rights reserved.
+// Copyright (c) 2006-2007 Alex King. All rights reserved.
 // http://alexking.org/projects/wordpress
 //
 // Released under the GPL license
