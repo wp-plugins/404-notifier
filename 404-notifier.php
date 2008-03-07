@@ -4,7 +4,7 @@
 Plugin Name: 404 Notifier
 Plugin URI: http://alexking.org/projects/wordpress
 Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events. Adjust your settings <a href="options-general.php?page=404-notifier.php">here</a>.
-Version: 1.1
+Version: 1.2
 Author: Alex King
 Author URI: http://alexking.org
 */ 
@@ -24,13 +24,7 @@ Author URI: http://alexking.org
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // **********************************************************************
 
-@define('AK_WPROOT', '../../');
-
-if (!isset($wpdb)) {
-	require(AK_WPROOT.'wp-blog-header.php');
-}
-
-load_plugin_textdomain('alexking.org');
+load_plugin_textdomain('404-notifier');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
 
@@ -178,26 +172,26 @@ class ak_404 {
 		}
 		print('
 			<div class="wrap">
-				<h2>'.__('404 Notifier Options', 'alexking.org').'</h2>
+				<h2>'.__('404 Notifier Options', '404-notifier').'</h2>
 				<form name="ak_404" action="'.get_bloginfo('wpurl').'/wp-admin/options-general.php" method="post">
 					<fieldset class="options">
 						<p>
 							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" '.$enabled.'/>
-							<label for="ak404_mail_enabled">'.__('Enable mail notifications on 404 hits.', 'alexking.org').'</label>
+							<label for="ak404_mail_enabled">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
 						</p>
 						<p>
-							<label for="mailto">'.__('E-mail address to notify:', 'alexking.org').'</label>
+							<label for="mailto">'.__('E-mail address to notify:', '404-notifier').'</label>
 							<input type="text" size="35" name="mailto" id="mailto" value="'.htmlspecialchars($this->mailto).'" />
 						</p>
 						<p>
-							<label for="rss_limit">'.__('Limit the RSS Feed to how many items?', 'alexking.org').'</label>
+							<label for="rss_limit">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
 							<input type="text" size="5" name="rss_limit" id="rss_limit" value="'.intval($this->rss_limit).'" />
 						</p>
-						<p><a href="'.get_bloginfo('wpurl').'/wp-admin/options-general.php?ak_action=404_feed">'.__('RSS Feed of 404 Events', 'alexking.org').'</a></p>
+						<p><a href="'.get_bloginfo('wpurl').'/wp-admin/options-general.php?ak_action=404_feed">'.__('RSS Feed of 404 Events', '404-notifier').'</a></p>
 						<input type="hidden" name="ak_action" value="update_404_settings" />
 					</fieldset>
 					<p class="submit">
-						<input type="submit" name="submit" value="'.__('Update 404 Notifier Settings', 'alexking.org').'" />
+						<input type="submit" name="submit" value="'.__('Update 404 Notifier Settings', '404-notifier').'" />
 					</p>
 				</form>
 			</div>
@@ -222,7 +216,7 @@ class ak_404 {
 >
 
 <channel>
-	<title><?php print(__('404 Report for: ', 'alexking.org')); bloginfo_rss('name'); ?></title>
+	<title><?php print(__('404 Report for: ', '404-notifier')); bloginfo_rss('name'); ?></title>
 	<link><?php bloginfo_rss('url') ?></link>
 	<description><?php bloginfo_rss("description") ?></description>
 	<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></pubDate>
@@ -232,9 +226,9 @@ class ak_404 {
 		if (count($events) > 0) {
 			foreach ($events as $event) {
 				$content = '
-					<p>'.__('404 URL: ', 'alexking.org').'<a href="'.$event->url_404.'">'.$event->url_404.'</a></p>
-					<p>'.__('Referring URL: ', 'alexking.org').'<a href="'.$event->url_refer.'">'.$event->url_refer.'</a></p>
-					<p>'.__('User Agent: ', 'alexking.org').$event->user_agent.'</p>
+					<p>'.__('404 URL: ', '404-notifier').'<a href="'.$event->url_404.'">'.$event->url_404.'</a></p>
+					<p>'.__('Referring URL: ', '404-notifier').'<a href="'.$event->url_refer.'">'.$event->url_refer.'</a></p>
+					<p>'.__('User Agent: ', '404-notifier').$event->user_agent.'</p>
 				';
 ?>
 	<item>
@@ -284,24 +278,6 @@ if (!function_exists('ak_check_email_address')) {
 	}
 }
 
-$ak404 = new ak_404;
-
-$wpdb->ak_404_log = $table_prefix.'ak_404_log';
-
-// CHECK FOR 404 NOTIFIER TABLES
-
-if (isset($_GET['activate']) && $_GET['activate'] == 'true') {
-	$result = mysql_list_tables(DB_NAME);
-	$tables = array();
-	while ($row = mysql_fetch_row($result)) {
-		$tables[] = $row[0];
-	}
-	if (!in_array($wpdb->ak_404_log, $tables)) {
-		$ak404->install();
-	}
-}
-$ak404->get_settings();
-
 function ak404_log() {
 	if (is_404()) {
 		global $ak404;
@@ -313,8 +289,8 @@ add_action('shutdown', 'ak404_log');
 function ak404_options() {
 	if (function_exists('add_options_page')) {
 		add_options_page(
-			__('404 Notifier Options', 'alexking.org')
-			, __('404 Notifier', 'alexking.org')
+			__('404 Notifier Options', '404-notifier')
+			, __('404 Notifier', '404-notifier')
 			, 10
 			, basename(__FILE__)
 			, 'ak404_options_form'
@@ -346,5 +322,24 @@ function ak404_request_handler() {
 	}
 }
 add_action('init', 'ak404_request_handler');
+
+function ak404_init() {
+	global $ak404, $wpdb;
+	$ak404 = new ak_404;
+	$wpdb->ak_404_log = $wpdb->prefix.'ak_404_log';
+	// CHECK FOR 404 NOTIFIER TABLES
+	if (isset($_GET['activate']) && $_GET['activate'] == 'true') {
+		$result = mysql_list_tables(DB_NAME);
+		$tables = array();
+		while ($row = mysql_fetch_row($result)) {
+			$tables[] = $row[0];
+		}
+		if (!in_array($wpdb->ak_404_log, $tables)) {
+			$ak404->install();
+		}
+	}
+	$ak404->get_settings();
+}
+add_action('init', 'ak404_init');
 
 ?>
