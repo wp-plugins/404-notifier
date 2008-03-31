@@ -9,7 +9,7 @@ Author: Alex King
 Author URI: http://alexking.org
 */ 
 
-// Copyright (c) 2006-2007 Alex King. All rights reserved.
+// Copyright (c) 2006-2008 Alex King. All rights reserved.
 // http://alexking.org/projects/wordpress
 //
 // Released under the GPL license

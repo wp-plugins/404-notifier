@@ -3,7 +3,7 @@ Tags: 404, error, log, notify
 Contributors: alexkingorg
 Requires at least: 1.5
 Tested up to: 2.5
-Stable tag: 1.2
+Stable tag: 1.2a
 
 Log 404 (file not found) errors on your site and get them delivered to you via e-mail or RSS.
 
