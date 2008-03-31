@@ -4,7 +4,7 @@
 Plugin Name: 404 Notifier
 Plugin URI: http://alexking.org/projects/wordpress
 Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events. Adjust your settings <a href="options-general.php?page=404-notifier.php">here</a>.
-Version: 1.2
+Version: 1.2a
 Author: Alex King
 Author URI: http://alexking.org
 */ 
@@ -200,6 +200,13 @@ class ak_404 {
 	
 	function rss_feed() {
 		global $wpdb;
+
+die("
+			SELECT *
+			FROM $wpdb->ak_404_log
+			ORDER BY date_gmt DESC
+			LIMIT $this->rss_limit
+");
 		$events = $wpdb->get_results("
 			SELECT *
 			FROM $wpdb->ak_404_log
@@ -321,7 +328,7 @@ function ak404_request_handler() {
 		}
 	}
 }
-add_action('init', 'ak404_request_handler');
+add_action('init', 'ak404_request_handler', 99);
 
 function ak404_init() {
 	global $ak404, $wpdb;
