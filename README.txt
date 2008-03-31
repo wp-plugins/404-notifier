@@ -3,13 +3,13 @@ Tags: 404, error, log, notify
 Contributors: alexkingorg
 Requires at least: 1.5
 Tested up to: 2.3
-Stable tag: 1.1
+Stable tag: 1.2
 
 Log 404 (file not found) errors on your site and get them delivered to you via e-mail or RSS.
 
 == Description ==
 
-If you've decided to move things around on your site (like I did recently), you might overlook a few redirects and end up with some broken URLs. This will help you catch those so you can take care of them.
+If you've decided to move things around on your site, you might overlook a few redirects and end up with some broken URLs. This will help you catch those so you can take care of them.
 
 == Installation == 
 
