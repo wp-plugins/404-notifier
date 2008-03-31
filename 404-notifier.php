@@ -342,4 +342,22 @@ function ak404_init() {
 }
 add_action('init', 'ak404_init');
 
+function ak404_admin_head() {
+	global $wp_version;
+	if (isset($wp_version) && version_compare($wp_version, '2.5', '>=')) {
+		print('
+<style type="text/css">
+fieldset.options {
+	border: 0;
+	padding: 10px;
+}
+fieldset.options p {
+	margin-bottom: 10px;
+}
+</style>
+		');
+	}
+}
+add_action('admin_head', 'ak404_admin_head');
+
 ?>
