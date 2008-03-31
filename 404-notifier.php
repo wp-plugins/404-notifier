@@ -200,13 +200,6 @@ class ak_404 {
 	
 	function rss_feed() {
 		global $wpdb;
-
-die("
-			SELECT *
-			FROM $wpdb->ak_404_log
-			ORDER BY date_gmt DESC
-			LIMIT $this->rss_limit
-");
 		$events = $wpdb->get_results("
 			SELECT *
 			FROM $wpdb->ak_404_log
