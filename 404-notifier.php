@@ -26,6 +26,8 @@ Author URI: http://alexking.org
 
 /* TODO
 1) Add $_SERVER['REMOTE_HOST'] and/or $_SERVER['REMOTE_ADDR']
+2) Add a notification filter to suppress notification based on a list of regexes.
+(probably just want to add some filters so others can add these)
 */
 
 load_plugin_textdomain('404-notifier');
