@@ -24,6 +24,10 @@ Author URI: http://alexking.org
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // **********************************************************************
 
+/* TODO
+1) Add $_SERVER['REMOTE_HOST'] and/or $_SERVER['REMOTE_ADDR']
+*/
+
 load_plugin_textdomain('404-notifier');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
