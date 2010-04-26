@@ -130,21 +130,23 @@ class cf_404 {
 		if (empty($this->url_404)) {
 			return;
 		}
-		$wpdb->query("
-			INSERT INTO $wpdb->cf_404_log
-			( url_404
-			, url_refer
-			, user_agent
-			, date_gmt
-			)
-			VALUES
-			( '".mysql_real_escape_string($this->url_404)."'
-			, '".mysql_real_escape_string($this->url_refer)."'
-			, '".mysql_real_escape_string($this->user_agent)."'
-			, '".current_time('mysql',1)."'
-			)
-		");
-		$this->mail_404();
+		if (strpos($this->url_404, 'preview=true') === false) {
+			$wpdb->query("
+				INSERT INTO $wpdb->cf_404_log
+				( url_404
+				, url_refer
+				, user_agent
+				, date_gmt
+				)
+				VALUES
+				( '".mysql_real_escape_string($this->url_404)."'
+				, '".mysql_real_escape_string($this->url_refer)."'
+				, '".mysql_real_escape_string($this->user_agent)."'
+				, '".current_time('mysql',1)."'
+				)
+			");
+			$this->mail_404();
+		}
 	}
 	
 	function mail_404() {
