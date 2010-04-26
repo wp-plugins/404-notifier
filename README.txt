@@ -34,4 +34,21 @@ That about does it - enjoy!
 == Changelog ==
 
 = 1.3 =
-* Updated code to newest best practices. Also updated the readme some.
+* Updated code to newest best practices.
+* Addressed feature requests and updated the readme.
+
+= 1.2a =
+* Pushed request handler to later in the WordPress startup queue.
+* Updated copyright info and readme.
+
+= 1.2 =
+* Removed some old code.
+* Updated translation slugs.
+* Added new initialization function and plugin-specific admin CSS.
+* Changed some wording in the readme.
+
+= 1.1 =
+* Updated copyright info, the readme, and bumped version.
+
+= 1.0 =
+* The first version.

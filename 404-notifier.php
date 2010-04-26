@@ -6,6 +6,22 @@ Description: This plugin will log 404 hits on your site and can notify you via e
 Version: 1.3 
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
+
+Copyright (c) 2006-2010 
+Crowd Favorite, Ltd. - http://crowdfavorite.com
+Alex King - http://alexking.org
+All rights reserved.
+
+Released under the GPL license
+http://www.opensource.org/licenses/gpl-license.php
+
+This is an add-on for WordPress - http://wordpress.org
+
+**********************************************************************
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+**********************************************************************
 */
 
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
@@ -337,5 +353,35 @@ fieldset.options p {
 	}
 }
 add_action('admin_head', 'cf404_admin_head');
+
+function cf404_main_dashboard_widget() {
+	global $wpdb;
+	$events = $wpdb->get_results("
+		SELECT *
+		FROM $wpdb->cf_404_log
+		ORDER BY date_gmt DESC
+		LIMIT 10
+	");
+	if (count($events) > 0) {
+		echo '<ul>';
+		foreach ($events as $event) {
+			print('<li>
+			<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.$event->url_404.'">'.$event->url_404.'</a><br/>
+			<strong>'.__('Referring URL:', '404-notifier').'</strong> <a href="'.$event->url_refer.'">'.$event->url_refer.'</a><br/>
+			<strong>'.__('User Agent:', '404-notifier').'</strong> '.$event->user_agent.'<br/>
+			<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
+			</li>');
+			$items_count++;
+			if ($items_count == 10) break;
+		}
+		echo '</ul>';
+	} else {
+		print('<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>');
+	}
+}
+function cf404_add_dashboard_widgets() {
+	wp_add_dashboard_widget('cf404_dashboard_widget', __('Recent 404 Logs', '404-notifier'), 'cf404_main_dashboard_widget');
+}
+add_action('wp_dashboard_setup', 'cf404_add_dashboard_widgets');
 
 ?>
