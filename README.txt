@@ -35,7 +35,9 @@ That about does it - enjoy!
 
 = 1.3 =
 * Updated code to newest best practices.
-* Addressed feature requests and updated the readme.
+* Added dashboard item that lists recent 404 hits.
+* Added feature which will filter out post preview urls.
+* Updated the copyright info and the readme.
 
 = 1.2a =
 * Pushed request handler to later in the WordPress startup queue.
