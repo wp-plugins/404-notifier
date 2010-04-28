@@ -2,27 +2,27 @@
 /*
 Plugin Name: 404 Notifier 
 Plugin URI: http://crowdfavorite.com/wordpress/plugins/404-notifier/ 
-Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events. Adjust your settings <a href="options-general.php?page=404-notifier.php">here</a>. 
+Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events.
 Version: 1.3 
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
-
-Copyright (c) 2006-2010 
-Crowd Favorite, Ltd. - http://crowdfavorite.com
-Alex King - http://alexking.org
-All rights reserved.
-
-Released under the GPL license
-http://www.opensource.org/licenses/gpl-license.php
-
-This is an add-on for WordPress - http://wordpress.org
-
-**********************************************************************
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-**********************************************************************
 */
+
+// Copyright (c) 2006-2010 
+//   Crowd Favorite, Ltd. - http://crowdfavorite.com
+//   Alex King - http://alexking.org
+// All rights reserved.
+//
+// Released under the GPL license
+// http://www.opensource.org/licenses/gpl-license.php
+//
+// This is an add-on for WordPress - http://wordpress.org
+//
+// **********************************************************************
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+// **********************************************************************
 
 // ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
@@ -30,7 +30,7 @@ load_plugin_textdomain('404-notifier');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
 
-class cf_404 {
+class ak_404 {
 	var $url_404;
 	var $url_refer;
 	var $user_agent;
@@ -39,7 +39,7 @@ class cf_404 {
 	var $rss_limit;
 	var $options;
 	
-	function cf_404() {
+	function ak_404() {
 		if (isset($_SERVER['REQUEST_URI'])) {
 			$this->url_404 = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 		}
@@ -71,7 +71,7 @@ class cf_404 {
 	function install() {
 		global $wpdb;
 		$result = $wpdb->query("
-			CREATE TABLE `$wpdb->cf_404_log` (
+			CREATE TABLE `$wpdb->ak_404_log` (
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 			`url_404` TEXT NOT NULL ,
 			`url_refer` TEXT NULL ,
@@ -79,31 +79,34 @@ class cf_404 {
 			`date_gmt` DATETIME NOT NULL
 			)
 		");
-		add_option('cf404_mailto', $this->mailto, 'Address to send mail to.');
-		add_option('cf404_mail_enabled', $this->mail_enabled, 'Send mail notifications?');
-		add_option('cf404_rss_limit', $this->rss_limit, '# of items to show at once in RSS Feed');
+		add_option('ak404_mailto', $this->mailto, 'Address to send mail to.');
+		add_option('ak404_mail_enabled', $this->mail_enabled, 'Send mail notifications?');
+		add_option('ak404_rss_limit', $this->rss_limit, '# of items to show at once in RSS Feed');
 	}
 	
 	function update_settings() {
-		foreach ($this->options as $option => $type) {
-			if (isset($_POST[$option])) {
-				switch ($type) {
-					case 'email':
-						$value = stripslashes($_POST[$option]);
-						if (!cf_check_email_address($value)) {
-							$value = '';
-						}
-						break;
-					case 'int':
-						$value = intval($_POST[$option]);
-						break;
-					default:
-						$value = stripslashes($_POST[$option]);
+		check_admin_referer('404-notifier');
+		if (current_user_can('manage_options')) {
+			foreach ($this->options as $option => $type) {
+				if (isset($_POST[$option])) {
+					switch ($type) {
+						case 'email':
+							$value = stripslashes($_POST[$option]);
+							if (!ak_check_email_address($value)) {
+								$value = '';
+							}
+							break;
+						case 'int':
+							$value = intval($_POST[$option]);
+							break;
+						default:
+							$value = stripslashes($_POST[$option]);
+					}
+					update_option('ak404_'.$option, $value);
 				}
-				update_option('cf404_'.$option, $value);
-			}
-			else {
-				update_option('cf404_'.$option, $this->$option);
+				else {
+					update_option('ak404_'.$option, $this->$option);
+				}
 			}
 		}
 
@@ -113,7 +116,7 @@ class cf_404 {
 	
 	function get_settings() {
 		foreach ($this->options as $option => $type) {
-			$this->$option = get_option('cf404_'.$option);
+			$this->$option = get_option('ak404_'.$option);
 			switch ($type) {
 				case 'email':
 					$this->$option = $this->$option;
@@ -130,23 +133,21 @@ class cf_404 {
 		if (empty($this->url_404)) {
 			return;
 		}
-		if (strpos($this->url_404, 'preview=true') === false) {
-			$wpdb->query("
-				INSERT INTO $wpdb->cf_404_log
-				( url_404
-				, url_refer
-				, user_agent
-				, date_gmt
-				)
-				VALUES
-				( '".mysql_real_escape_string($this->url_404)."'
-				, '".mysql_real_escape_string($this->url_refer)."'
-				, '".mysql_real_escape_string($this->user_agent)."'
-				, '".current_time('mysql',1)."'
-				)
-			");
-			$this->mail_404();
-		}
+		$wpdb->query("
+			INSERT INTO $wpdb->ak_404_log
+			( url_404
+			, url_refer
+			, user_agent
+			, date_gmt
+			)
+			VALUES
+			( '".mysql_real_escape_string($this->url_404)."'
+			, '".mysql_real_escape_string($this->url_refer)."'
+			, '".mysql_real_escape_string($this->user_agent)."'
+			, '".current_time('mysql',1)."'
+			)
+		");
+		$this->mail_404();
 	}
 	
 	function mail_404() {
@@ -165,15 +166,77 @@ class cf_404 {
 		}
 	}
 
+	function dashboard_page() {
+		global $wpdb;
+		print('
+			<div class="wrap">
+				'.screen_icon().'
+				<h2>'.__('404 Notifier Logs', '404-notifier').'</h2>
+		');
+
+		$per_page = 20;
+		$pagenum = isset($_GET['paged']) ? absint($_GET['paged']) : 0;
+		if (empty($pagenum)) $pagenum = 1;
+		$offset = ($pagenum - 1) * $per_page;
+		$events = $wpdb->get_results("
+			SELECT *
+			FROM $wpdb->ak_404_log
+			ORDER BY date_gmt DESC
+			LIMIT $offset, $per_page
+		");
+		$overall_count = count($wpdb->get_results("SELECT * FROM $wpdb->ak_404_log"));
+		if ($overall_count > 0) {
+			$num_pages = ceil($overall_count / $per_page);
+			$page_links = paginate_links(array(
+				'base' => add_query_arg('paged', '%#%'),
+				'format' => '',
+				'prev_text' => __('&laquo;'),
+				'next_text' => __('&raquo;'),
+				'total' => $num_pages,
+				'current' => $pagenum
+			));
+			if ($page_links) {
+				echo '<div class="tablenav"><div class="tablenav-pages">';
+				$page_links_text = sprintf('<span class="displaying-num">'.__('Displaying %s&#8211;%s of %s', '404-notifier').'</span>%s',
+					number_format_i18n(($pagenum-1) * $per_page+1),
+					number_format_i18n(min($pagenum * $per_page, $overall_count)),
+					number_format_i18n($overall_count),
+					$page_links
+				);
+				echo $page_links_text.'</div><div class="clear"></div></div>';
+			}
+
+			echo '<ul>';
+			foreach ($events as $event) {
+				print('<li>
+				<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a><br/>
+				<strong>'.__('Referring URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a><br/>
+				<strong>'.__('User Agent:', '404-notifier').'</strong> '.esc_html($event->user_agent).'<br/>
+				<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
+				</li>');
+			}
+			echo '</ul>';
+
+			if ($page_links)
+				echo '<div class="tablenav"><div class="tablenav-pages">'.$page_links_text.'</div><div class="clear"></div></div>';
+		} else {
+			print('<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>');
+		}
+
+		print('
+			</div>
+		');
+	}
+
 	function options_form() {
 		print('
 			<div class="wrap">
 				<h2>'.__('404 Notifier Options', '404-notifier').'</h2>
-				<form name="cf_404" action="'.admin_url('options-general.php').'" method="post">
+				<form name="ak_404" action="'.admin_url('options-general.php').'" method="post">
 					<fieldset class="options">
 						<p>
-							<input type="checkbox" name="mail_enabled" id="cf404_mail_enabled" value="1" '.checked($this->mail_enabled, '1', false).'/>
-							<label for="cf404_mail_enabled">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
+							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" '.checked($this->mail_enabled, '1', false).'/>
+							<label for="ak404_mail_enabled">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
 						</p>
 						<p>
 							<label for="mailto">'.__('E-mail address to notify:', '404-notifier').'</label>
@@ -183,11 +246,13 @@ class cf_404 {
 							<label for="rss_limit">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
 							<input type="text" size="5" name="rss_limit" id="rss_limit" value="'.intval($this->rss_limit).'" />
 						</p>
-						<p><a href="'.admin_url('options-general.php?cf_action=404_feed').'">'.__('RSS Feed of 404 Events', '404-notifier').'</a></p>
-						<input type="hidden" name="cf_action" value="update_404_settings" />
+						<p><a href="'.admin_url('options-general.php?ak_action=404_feed').'">'.__('RSS Feed of 404 Events', '404-notifier').'</a></p>
+						<input type="hidden" name="ak_action" value="update_404_settings" />
 					</fieldset>
 					<p class="submit">
 						<input type="submit" name="submit" value="'.__('Update 404 Notifier Settings', '404-notifier').'" />
+						'.wp_nonce_field('404-notifier', '_wpnonce', true, false).'
+						'.wp_referer_field(false).'
 					</p>
 				</form>
 			</div>
@@ -198,7 +263,7 @@ class cf_404 {
 		global $wpdb;
 		$events = $wpdb->get_results("
 			SELECT *
-			FROM $wpdb->cf_404_log
+			FROM $wpdb->ak_404_log
 			ORDER BY date_gmt DESC
 			LIMIT $this->rss_limit
 		");
@@ -243,8 +308,8 @@ class cf_404 {
 	}
 }
 
-if (!function_exists('cf_check_email_address')) {
-	function cf_check_email_address($email) {
+if (!function_exists('ak_check_email_address')) {
+	function ak_check_email_address($email) {
 // From: http://www.ilovejackdaniels.com/php/email-address-validation/
 // First, we check that there's one @ symbol, and that the lengths are right
 		if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
@@ -274,116 +339,122 @@ if (!function_exists('cf_check_email_address')) {
 	}
 }
 
-function cf404_log() {
+function ak404_activate() {
+	global $ak404, $wpdb;
+	$ak404 = new ak_404;
+	$wpdb->ak_404_log = $wpdb->prefix.'ak_404_log';
+	$tables = $wpdb->get_col("
+		SHOW TABLES LIKE '$wpdb->ak_404_log'
+	");
+	if (!in_array($wpdb->ak_404_log, $tables))
+		$ak404->install();
+}
+register_activation_hook(__FILE__, 'ak404_activate');
+
+function ak404_init() {
+	global $ak404, $wpdb;
+	$ak404 = new ak_404;
+	$wpdb->ak_404_log = $wpdb->prefix.'ak_404_log';
+	$ak404->get_settings();
+}
+add_action('init', 'ak404_init');
+
+function ak404_log() {
 	if (is_404()) {
-		global $cf404;
-		$cf404->log_404();
+		global $ak404;
+		$ak404->log_404();
 	}
 }
-add_action('shutdown', 'cf404_log');
+add_action('shutdown', 'ak404_log');
 
-function cf404_options() {
+function ak404_admin_menu() {
+	if (function_exists('add_submenu_page')) {
+		add_submenu_page(
+			'index.php'
+			, __('404 Notifier Logs', '404-notifier')
+			, __('404 Logs', '404-notifier')
+			, 'read'
+			, basename(__FILE__)
+			, 'ak404_dashboard_page'
+		);
+	}
 	if (function_exists('add_options_page')) {
 		add_options_page(
 			__('404 Notifier Options', '404-notifier')
 			, __('404 Notifier', '404-notifier')
-			, 10
+			, 'manage_options'
 			, basename(__FILE__)
-			, 'cf404_options_form'
+			, 'ak404_options_form'
 		);
 	}
 }
-add_action('admin_menu', 'cf404_options');
+add_action('admin_menu', 'ak404_admin_menu');
 
-function cf404_options_form() {
-	global $cf404;
-	$cf404->options_form();
+function ak404_dashboard_page() {
+	global $ak404;
+	$ak404->dashboard_page();
 }
 
-function cf404_request_handler() {
-	$cf404 = new cf_404;
-	if (!empty($_POST['cf_action'])) {
-		switch($_POST['cf_action']) {
+function ak404_options_form() {
+	global $ak404;
+	$ak404->options_form();
+}
+
+function ak404_request_handler() {
+	$ak404 = new ak_404;
+	if (!empty($_POST['ak_action'])) {
+		switch($_POST['ak_action']) {
 			case 'update_404_settings': 
-				$cf404->update_settings();
+				$ak404->update_settings();
 				break;
 		}
 	}
-	if (!empty($_GET['cf_action'])) {
-		switch($_GET['cf_action']) {
+	if (!empty($_GET['ak_action'])) {
+		switch($_GET['ak_action']) {
 			case '404_feed':
-				$cf404->rss_feed();
+				$ak404->rss_feed();
 				break;
 		}
 	}
 }
-add_action('init', 'cf404_request_handler', 99);
+add_action('admin_init', 'ak404_request_handler', 99);
 
-function cf404_init() {
-	global $cf404, $wpdb;
-	$cf404 = new cf_404;
-	$wpdb->cf_404_log = $wpdb->prefix.'cf_404_log';
-	// CHECK FOR 404 NOTIFIER TABLES
-	if (isset($_GET['activate']) && $_GET['activate'] == 'true') {
-		$result = mysql_list_tables(DB_NAME);
-		$tables = array();
-		while ($row = mysql_fetch_row($result)) {
-			$tables[] = $row[0];
-		}
-		if (!in_array($wpdb->cf_404_log, $tables)) {
-			$cf404->install();
-		}
-	}
-	$cf404->get_settings();
+function ak404_plugin_action_links($links, $file) {
+	if ($file == plugin_basename(__FILE__))
+		$links[] = '<a href="'.admin_url('options-general.php?page=404-notifier.php').'">Settings</a>';
+	return $links;
 }
-add_action('init', 'cf404_init');
+add_filter('plugin_action_links', 'ak404_plugin_action_links', 10, 2);
 
-function cf404_admin_head() {
-	global $wp_version;
-	if (isset($wp_version) && version_compare($wp_version, '2.5', '>=')) {
-		print('
-<style type="text/css">
-fieldset.options {
-	border: 0;
-	padding: 10px;
-}
-fieldset.options p {
-	margin-bottom: 10px;
-}
-</style>
-		');
-	}
-}
-add_action('admin_head', 'cf404_admin_head');
-
-function cf404_main_dashboard_widget() {
+function ak404_main_dashboard_widget() {
 	global $wpdb;
 	$events = $wpdb->get_results("
 		SELECT *
-		FROM $wpdb->cf_404_log
+		FROM $wpdb->ak_404_log
 		ORDER BY date_gmt DESC
-		LIMIT 10
+		LIMIT 5
 	");
 	if (count($events) > 0) {
 		echo '<ul>';
 		foreach ($events as $event) {
 			print('<li>
-			<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.$event->url_404.'">'.$event->url_404.'</a><br/>
-			<strong>'.__('Referring URL:', '404-notifier').'</strong> <a href="'.$event->url_refer.'">'.$event->url_refer.'</a><br/>
-			<strong>'.__('User Agent:', '404-notifier').'</strong> '.$event->user_agent.'<br/>
+			<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a><br/>
+			<strong>'.__('Referring URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a><br/>
+			<strong>'.__('User Agent:', '404-notifier').'</strong> '.esc_html($event->user_agent).'<br/>
 			<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
 			</li>');
 			$items_count++;
-			if ($items_count == 10) break;
+			if ($items_count == 5) break;
 		}
-		echo '</ul>';
+		echo '</ul>
+		<p class="textright"><a href="'.admin_url('index.php?page=404-notifier.php').'" class="button">'.__('View all').'</a></p>';
 	} else {
 		print('<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>');
 	}
 }
-function cf404_add_dashboard_widgets() {
-	wp_add_dashboard_widget('cf404_dashboard_widget', __('Recent 404 Logs', '404-notifier'), 'cf404_main_dashboard_widget');
+function ak404_add_dashboard_widgets() {
+	wp_add_dashboard_widget('ak404_dashboard_widget', __('Recent 404 Logs', '404-notifier'), 'ak404_main_dashboard_widget');
 }
-add_action('wp_dashboard_setup', 'cf404_add_dashboard_widgets');
+add_action('wp_dashboard_setup', 'ak404_add_dashboard_widgets');
 
 ?>

@@ -35,8 +35,7 @@ That about does it - enjoy!
 
 = 1.3 =
 * Updated code to newest best practices.
-* Added dashboard item that lists recent 404 hits.
-* Added feature which will filter out post preview urls.
+* Added dashboard page that lists all 404 hits and a dashboard widget that lists recent 404 hits.
 * Updated the copyright info and the readme.
 
 = 1.2a =
