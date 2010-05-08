@@ -55,9 +55,9 @@ class ak_404 {
 		$this->mail_enabled = 0;
 		$this->rss_limit = 100;
 		$this->options = array(
-			'mailto' => 'email'
-			, 'mail_enabled' => 'int'
-			, 'rss_limit' => 'int'
+			'mailto' => 'email',
+			'mail_enabled' => 'int',
+			'rss_limit' => 'int'
 		);
 	}
 
@@ -68,7 +68,7 @@ class ak_404 {
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 			`url_404` TEXT NOT NULL ,
 			`url_refer` TEXT NULL ,
-			`remote_addr` TEXT NULL ,
+			`remote_addr` VARCHAR(255) NULL ,
 			`remote_host` TEXT NULL ,
 			`user_agent` TEXT NULL ,
 			`date_gmt` DATETIME NOT NULL
@@ -92,7 +92,7 @@ class ak_404 {
 		if (!in_array('remote_addr', $cols)) {
 			$wpdb->query("
 				ALTER TABLE `$wpdb->ak_404_log`
-				ADD `remote_addr` TEXT DEFAULT NULL
+				ADD `remote_addr` VARCHAR(255) DEFAULT NULL
 				AFTER `url_refer`
 			");
 		}
