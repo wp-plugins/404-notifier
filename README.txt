@@ -14,7 +14,7 @@ If you've decided to move things around on your site, you might overlook a few r
 == Installation == 
 
 1. Download the plugin archive and expand it (you've likely already done this).
-2. Upload the 404-notifier.php file to your wp-content/plugins directory (not in a sub-folder).
+2. Upload the plugin files to your wp-content/plugins directory.
 3. Go to the Plugins page in your WordPress Administration area and click 'Activate' for 404 Notifier. This will create the 404 log table for you.
 4. Optional: Configure your 404 Notifier options and get the RSS feed URL by going to Options > 404 Notifier in the WP Admin area.
 5. Optional: Subscribe to the 404 Notifier RSS feed (link on the options page).
