@@ -3,7 +3,7 @@
 Plugin Name: 404 Notifier 
 Plugin URI: http://crowdfavorite.com/wordpress/plugins/404-notifier/ 
 Description: This plugin will log 404 hits on your site and can notify you via e-mail or you can subscribe to the generated RSS feed of 404 events.
-Version: 1.3 
+Version: 1.3
 Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
@@ -23,8 +23,6 @@ Author URI: http://crowdfavorite.com
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 // **********************************************************************
-
-// ini_set('display_errors', '1'); ini_set('error_reporting', E_ALL);
 
 load_plugin_textdomain('404-notifier');
 
@@ -401,7 +399,6 @@ if (!function_exists('ak_check_email_address')) {
 }
 
 function ak404_activate() {
-	error_log("activation");
 	global $ak404, $wpdb;
 	$ak404 = new ak_404;
 	$tables = $wpdb->get_col("
@@ -460,7 +457,6 @@ function ak404_options_form() {
 }
 
 function ak404_request_handler() {
-	//$ak404 = new ak_404;
 	global $ak404;
 	if (!empty($_POST['ak_action'])) {
 		switch($_POST['ak_action']) {
