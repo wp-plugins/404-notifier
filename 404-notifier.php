@@ -26,11 +26,15 @@ Author URI: http://crowdfavorite.com
 
 load_plugin_textdomain('404-notifier');
 
+
+
 if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier.php');
+	define('N404_RELATIVE_FILE', '404-notifier.php');
 }
 else if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php');
+	define('N404_RELATIVE_FILE', '404-notifier/404-notifier.php');
 }
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
@@ -398,19 +402,49 @@ if (!function_exists('ak_check_email_address')) {
 	}
 }
 
-function ak404_activate() {
+function ak404_activate() {	
+	if (function_exists('is_multisite') && is_multisite()) {
+		if (isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
+			$blogs = cfmobi_get_site_blogs();
+			foreach ($blogs as $blog_id){
+				switch_to_blog($blog_id);
+				ak404_activate_single();
+				restore_current_blog();
+			}
+		}
+	}
+	ak404_activate_single();
+}
+
+function ak404_activate_single() {
 	global $ak404, $wpdb;
 	$ak404 = new ak_404;
 	$tables = $wpdb->get_col("
 		SHOW TABLES LIKE '$wpdb->ak_404_log'
 	");
+	
+	error_log($wpdb->ak_404_log);
+	error_log(get_bloginfo('name'));
+	error_log($wpdb->prefix);
+	error_log(implode(', ', $tables));
+	
 	if (!in_array($wpdb->ak_404_log, $tables)) {
 		$ak404->install();
 	}
+	
 }
+
+
 register_activation_hook(N404_FILE, 'ak404_activate');
 
 function ak404_init() {
+	global $ak404;
+	// Place here instead of activation for sites added after activation
+	// Based on the proper-network-activation plugin by scribu
+	/*if (ak404_is_network_wide(N404_RELATIVE_FILE)) {
+		ak404_activate_all_sites();
+	}*/
+		
 	global $ak404;
 	$ak404 = new ak_404;
 	$ak404->get_settings();
@@ -517,4 +551,127 @@ function ak404_add_dashboard_widgets() {
 }
 add_action('wp_dashboard_setup', 'ak404_add_dashboard_widgets');
 
+//Multisite utility functions 
+function ak404_get_site_blogs() {
+	global $wpdb;
+	//Based the proper-networt-activation plugin by scribu
+	return $wpdb->get_col( "
+		SELECT blog_id
+		FROM $wpdb->blogs
+		WHERE site_id = '{$wpdb->siteid}'
+		AND deleted = 0
+	");
+	
+}
+function ak404_activate_all_sites(){
+	global $switched;
+	$blogs = ak404_get_site_blogs();
+	foreach ($blogs as $blog_id){
+		switch_to_blog($blog_id);
+		/*if ( in_array(N404_RELATIVE_FILE, (array) get_option( 'active_plugins' ))) {
+			ak404_activate();
+		}*/
+		error_log( 'cursite: ' . get_bloginfo('name'));
+		ak404_activate();
+		error_log($ms_blog_id);
+		restore_current_blog();
+	}
+}
+
+function ak404_is_network_wide($plugin){
+	global $wp_version;
+	if( (int)$wp_version[0] >= 3){
+		if (!is_multisite()){ 
+		 return false;
+		}
+		$plugins = get_site_option( 'active_sitewide_plugins'); 
+		if (isset($plugins[$plugin])) {  
+			return true;
+		}
+	}
+	else {
+		return false;
+	}
+}
+
+function myplugin_activate_for_network(){
+	global $wpdb;
+ 	$blogs = $wpdb->get_col( "
+		SELECT blog_id
+		FROM $wpdb->blogs
+		WHERE site_id = '{$wpdb->siteid}'
+		AND deleted = 0
+	");
+	foreach ($blogs as $blog_id) {
+		switch_to_blog($blog_id);
+		myplugin_activate();
+		unset($wpdb);
+		restore_current_blog();
+	}
+	
+	
+}
+
+function myplugin_activate() {	
+	global $myplugin, $wpdb;
+	$myplugin = new myplugin;
+	$tables = $wpdb->get_col("
+		SHOW TABLES LIKE '$wpdb->my_plugin_table'
+	");
+
+	error_log(get_bloginfo('name'));
+	error_log($wpdb->prefix);
+	error_log(implode(', ', $tables));
+
+
+	if (!in_array($wpdb->my_plugin_table, $tables)) {
+		$myplugin->install();
+	}
+
+}
+/*
+Hello, I have a plugin that is working on a wordpress single site installation and am trying to get to to work for multi-site. The obstacle has been upon network activation creating my plugin tables for each of the sites.
+
+When I activate the plugin on any of the 'sub-sites' it will create the table with the proper prefix, however my check that attempts to setup tables for all the other sites simply does not work. Instead it will create a table that is named as if it were a single site installation. For example wp_myplugin_table vs wp_2_myplugin_table. 
+
+I call myplugin_activate_for_network within my init function after checking to make sure it is a multisite:
+
+function myplugin_activate_for_network(){
+	global $wpdb;
+ 	$blogs = $wpdb->get_col( "
+		SELECT blog_id
+		FROM $wpdb->blogs
+		WHERE site_id = '{$wpdb->siteid}'
+		AND deleted = 0
+	");
+	foreach ($blogs as $blog_id) {
+		switch_to_blog($blog_id);
+		myplugin_activate();
+		restore_current_blog();
+	}
+	
+	
+}
+
+
+function myplugin_activate() {	
+	global $myplugin, $wpdb;
+	$myplugin = new myplugin;
+	$tables = $wpdb->get_col("
+		SHOW TABLES LIKE '$wpdb->my_plugin_table'
+	");
+
+	error_log(get_bloginfo('name'));
+	error_log($wpdb->prefix);
+	error_log(implode(', ', $tables));
+
+
+	if (!in_array($wpdb->my_plugin_table, $tables)) {
+		$myplugin->install();
+	}
+
+}
+
+myplugin_activate_for_network() seems to work just fine as it runs myplugin_activate() as many times as there are sites. Additionally the get_bloginf( 'name' ) and $wpdb->prefix are producing the correct values for their respective site. However $wpdb->myplugin_table gives me wp_myplugin_table everytime instead of the correct prefix followed by _myplugin_table. I appreciate any insight on this! 
+*/
 ?>
