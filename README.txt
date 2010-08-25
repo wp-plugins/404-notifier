@@ -2,7 +2,7 @@
 Contributors: crowdfavorite, alexkingorg
 Tags: 404, error, log, notify
 Requires at least: 2.8
-Tested up to: 3.0
+Tested up to: 3.0.1
 Stable tag: 1.3
 
 Log 404 (file not found) errors on your site and get them delivered to you via e-mail or RSS.
@@ -27,6 +27,10 @@ Congratulations, you've just installed 404 Notifier.
 
 No, this only works if you use pretty permalinks (/2006/01/01/post-name or similar). From what I can tell, the WordPress code doesn't flag URLs as 404s with ugly permalinks.
 
+= Will this work for a multisite installation? =
+
+Yes, your 404 logs will be blog specific.
+
 = Anything else? =
 
 That about does it - enjoy!
@@ -37,6 +41,8 @@ That about does it - enjoy!
 * Updated code to newest best practices.
 * Added dashboard page that lists all 404 hits and a dashboard widget that lists recent 404 hits.
 * Updated the copyright info and the readme.
+* Multisite support
+* Standardization of admin layout
 
 = 1.2a =
 * Pushed request handler to later in the WordPress startup queue.

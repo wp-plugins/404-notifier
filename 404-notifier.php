@@ -29,10 +29,14 @@ load_plugin_textdomain('404-notifier');
 if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier.php');
+	define('N404_HTML_URL', trailingslashit(WP_PLUGIN_URL).'working-html');
+	define('N404_HTML_DIR', trailingslashit(WP_PLUGIN_DIR).'working-html');
 }
 else if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier/404-notifier.php');
+	define('N404_HTML_URL', trailingslashit(WP_PLUGIN_URL).'404-notifier/working-html');
+	define('N404_HTML_DIR', trailingslashit(WP_PLUGIN_DIR).'404-notifier/working-html');
 }
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
@@ -70,8 +74,9 @@ class ak_404 {
 
 	function install() {
 		global $wpdb;
+		$table = ak404_get_cursite_tablename();
 		$result = $wpdb->query("
-			CREATE TABLE `$wpdb->ak_404_log` (
+			CREATE TABLE `$table` (
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 			`url_404` TEXT NOT NULL ,
 			`url_refer` TEXT NULL ,
@@ -159,7 +164,7 @@ class ak_404 {
 		if (empty($this->url_404)) {
 			return;
 		}
-		$wpdb->query("
+		$wpdb->query( $wpdb->prepare("
 			INSERT INTO $wpdb->ak_404_log
 			( url_404
 			, url_refer
@@ -169,14 +174,14 @@ class ak_404 {
 			, date_gmt
 			)
 			VALUES
-			( '".mysql_real_escape_string($this->url_404)."'
-			, '".mysql_real_escape_string($this->url_refer)."'
-			, '".mysql_real_escape_string($this->remote_addr)."'
-			, '".mysql_real_escape_string($this->remote_host)."'
-			, '".mysql_real_escape_string($this->user_agent)."'
+			( %s
+			, %s
+			, %s
+			, %s
+			, %s
 			, '".current_time('mysql',1)."'
 			)
-		");
+		", $this->url_404, $this->url_refer, $this->remote_addr, $this->remote_host, $this->user_agent  ))  ;
 		$this->mail_404();
 	}
 	
@@ -291,33 +296,39 @@ class ak_404 {
 
 	function options_form() {
 		print('
-			<div class="wrap">
-				<h2>'.__('404 Notifier Options', '404-notifier').'</h2>
-				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post">
-					<fieldset class="options">
-						<p>
-							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" '.checked($this->mail_enabled, '1', false).'/>
-							<label for="ak404_mail_enabled">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
-						</p>
-						<p>
-							<label for="mailto">'.__('E-mail address to notify:', '404-notifier').'</label>
-							<input type="text" size="35" name="mailto" id="mailto" value="'.htmlspecialchars($this->mailto).'" />
-						</p>
-						<p>
-							<label for="rss_limit">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
-							<input type="text" size="5" name="rss_limit" id="rss_limit" value="'.intval($this->rss_limit).'" />
-						</p>
-						<p><a href="'.esc_url(admin_url('options-general.php?ak_action=404_feed')).'">'.__('RSS Feed of 404 Events', '404-notifier').'</a></p>
-						<input type="hidden" name="ak_action" value="update_404_settings" />
+			<div id="cf" class="wrap">
+				<h2>'.__('404 Notifier Options', '404-notifier').'</h2>');
+		//include (trailingslashit(N404_HTML_DIR) . 'includes/cf-banner.php');
+		print('	
+				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post" class="cf-form">
+					<fieldset class="lbl-pos-left" >
+						<div class="elm-block elm-width-300">
+							<label for="mailto" class="lbl-text">'.__('E-mail address to notify:', '404-notifier').'</label>
+							<input type="text" size="35" name="mailto" id="mailto" value="'.esc_html($this->mailto).'" />
+						</div>
+						<div class="elm-block has-checkbox elm-width-300">
+							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" class="elm-checkbox"'.checked($this->mail_enabled, '1', false).'/>
+							<label for="ak404_mail_enabled" class="lbl-checkbox">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
+						</div>
+						<div class="elm-block elm-width-50">
+							<label for="rss_limit" class="lbl-text">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
+							<input type="text" name="rss_limit" id="rss_limit" class="elm-text" value="'.intval($this->rss_limit).'" />
+						</div>
+						<div class="elm-block elm-width-300">
+							<a href="'.esc_url(admin_url('options-general.php?ak_action=404_feed')).'">'.__('RSS Feed of 404 Events', '404-notifier').'</a>
+						</div>
+						<input type="hidden" name="ak_action" value="update_404_settings"/>
 					</fieldset>
 					<p class="submit">
-						<input type="submit" name="submit" value="'.__('Update 404 Notifier Settings', '404-notifier').'" />
+						<input type="submit" name="submit" value="'.__('Update 404 Notifier Settings', '404-notifier').'"  class="button-primary" />
 						'.wp_nonce_field('404-notifier', '_wpnonce', true, false).'
 						'.wp_referer_field(false).'
 					</p>
 				</form>
-			</div>
-		');
+			');
+	
+		include (trailingslashit(N404_HTML_DIR) . 'includes/cf-callouts.php');
+		echo '</div>';
 	}
 	
 	function rss_feed() {
@@ -400,52 +411,45 @@ if (!function_exists('ak_check_email_address')) {
 	}
 }
 
-function ak404_activate() {	
-	if (function_exists('is_multisite') && is_multisite()) {
-		if (isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
-			$blogs = cfmobi_get_site_blogs();
-			foreach ($blogs as $blog_id){
-				switch_to_blog($blog_id);
-				ak404_activate_single();
-				restore_current_blog();
-			}
-		}
+function ak404_admin_head() {
+	$cf_styles = trailingslashit(N404_HTML_URL) . 'css/styles.css';
+	$cf_form_elements = trailingslashit(N404_HTML_URL) . 'css/form-elements.css';  
+	echo '<link rel="stylesheet" type="text/css" href="' . $cf_styles . '" />';
+	echo '<link rel="stylesheet" type="text/css" href="' . $cf_form_elements . '" />';
+	
+}
+add_action('admin_head', 'ak404_admin_head');
+
+register_activation_hook(N404_FILE, 'ak404_activate');
+function ak404_activate() {
+ 	if (ak404_is_multisite_and_network_activate()) {
+		ak404_activate_for_network();
 	}
-	ak404_activate_single();
+	else {
+		ak404_activate_single();
+	}
 }
 
 function ak404_activate_single() {
 	global $ak404, $wpdb;
 	$ak404 = new ak_404;
+	$table = ak404_get_cursite_tablename();
 	$tables = $wpdb->get_col("
-		SHOW TABLES LIKE '$wpdb->ak_404_log'
+		SHOW TABLES LIKE '$table'
 	");
-	
-	error_log($wpdb->ak_404_log);
-	error_log(get_bloginfo('name'));
-	error_log($wpdb->prefix);
-	error_log(implode(', ', $tables));
-	
-	if (!in_array($wpdb->ak_404_log, $tables)) {
+	if (!in_array($table, $tables)) {
 		$ak404->install();
 	}
-	
 }
 
-
-register_activation_hook(N404_FILE, 'ak404_activate');
-
 function ak404_init() {
-	global $ak404;
-	// Place here instead of activation for sites added after activation
-	// Based on the proper-network-activation plugin by scribu
-	/*if (ak404_is_network_wide(N404_RELATIVE_FILE)) {
-		ak404_activate_all_sites();
-	}*/
-		
-	global $ak404;
+	global $ak404;		
 	$ak404 = new ak_404;
 	$ak404->get_settings();
+	if (is_admin()) {
+		wp_enqueue_script('cf_admin_cookie_js', trailingslashit(N404_HTML_URL) . 'js/jquery.cookie.js', array('jquery'));
+		wp_enqueue_script('cf_js_script', trailingslashit(N404_HTML_URL) . 'js/scripts.js', array('jquery'));
+	}
 }
 add_action('init', 'ak404_init');
 
@@ -549,82 +553,47 @@ function ak404_add_dashboard_widgets() {
 }
 add_action('wp_dashboard_setup', 'ak404_add_dashboard_widgets');
 
-//Multisite utility functions 
+//Multisite utility and integration functions 
 function ak404_get_site_blogs() {
 	global $wpdb;
-	//Based the proper-networt-activation plugin by scribu
 	return $wpdb->get_col( "
 		SELECT blog_id
 		FROM $wpdb->blogs
 		WHERE site_id = '{$wpdb->siteid}'
 		AND deleted = 0
 	");
-	
-}
-function ak404_activate_all_sites(){
-	global $switched;
-	$blogs = ak404_get_site_blogs();
-	foreach ($blogs as $blog_id){
-		switch_to_blog($blog_id);
-		/*if ( in_array(N404_RELATIVE_FILE, (array) get_option( 'active_plugins' ))) {
-			ak404_activate();
-		}*/
-		error_log( 'cursite: ' . get_bloginfo('name'));
-		ak404_activate();
-		error_log($ms_blog_id);
-		restore_current_blog();
-	}
 }
 
-function ak404_is_network_wide($plugin){
-	global $wp_version;
-	if( (int)$wp_version[0] >= 3){
-		if (!is_multisite()){ 
-		 return false;
-		}
-		$plugins = get_site_option( 'active_sitewide_plugins'); 
-		if (isset($plugins[$plugin])) {  
+function ak404_is_multisite_and_network_activate() {
+	if (function_exists('is_multisite') && is_multisite() &&
+		isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
 			return true;
-		}
 	}
 	else {
 		return false;
-	}
+	}		
 }
 
-function myplugin_activate_for_network(){
-	global $wpdb;
- 	$blogs = $wpdb->get_col( "
-		SELECT blog_id
-		FROM $wpdb->blogs
-		WHERE site_id = '{$wpdb->siteid}'
-		AND deleted = 0
-	");
+function ak404_activate_for_network() {
+	$blogs = ak404_get_site_blogs();
 	foreach ($blogs as $blog_id) {
 		switch_to_blog($blog_id);
-		myplugin_activate();
-		unset($wpdb);
+		ak404_activate_single();
 		restore_current_blog();
 	}
-	
-	
 }
 
-function myplugin_activate() {	
-	global $myplugin, $wpdb;
-	$myplugin = new myplugin;
-	$tables = $wpdb->get_col("
-		SHOW TABLES LIKE '$wpdb->my_plugin_table'
-	");
-
-	error_log(get_bloginfo('name'));
-	error_log($wpdb->prefix);
-	error_log(implode(', ', $tables));
-
-
-	if (!in_array($wpdb->my_plugin_table, $tables)) {
-		$myplugin->install();
+// Hack for wp multisite 
+function ak404_get_cursite_tablename() {
+	global $wpdb;
+	//Probably don't need this if statement
+	if (ak404_is_multisite_and_network_activate()) {		
+		$table = $wpdb->prefix . 'ak_404_log';
 	}
-
+	else {
+		$table = $wpdb->ak_404_log;
+	}	
+	return $table;
 }
+
 ?>
