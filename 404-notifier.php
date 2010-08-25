@@ -26,8 +26,6 @@ Author URI: http://crowdfavorite.com
 
 load_plugin_textdomain('404-notifier');
 
-
-
 if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier.php');
@@ -629,49 +627,4 @@ function myplugin_activate() {
 	}
 
 }
-/*
-Hello, I have a plugin that is working on a wordpress single site installation and am trying to get to to work for multi-site. The obstacle has been upon network activation creating my plugin tables for each of the sites.
-
-When I activate the plugin on any of the 'sub-sites' it will create the table with the proper prefix, however my check that attempts to setup tables for all the other sites simply does not work. Instead it will create a table that is named as if it were a single site installation. For example wp_myplugin_table vs wp_2_myplugin_table. 
-
-I call myplugin_activate_for_network within my init function after checking to make sure it is a multisite:
-
-function myplugin_activate_for_network(){
-	global $wpdb;
- 	$blogs = $wpdb->get_col( "
-		SELECT blog_id
-		FROM $wpdb->blogs
-		WHERE site_id = '{$wpdb->siteid}'
-		AND deleted = 0
-	");
-	foreach ($blogs as $blog_id) {
-		switch_to_blog($blog_id);
-		myplugin_activate();
-		restore_current_blog();
-	}
-	
-	
-}
-
-
-function myplugin_activate() {	
-	global $myplugin, $wpdb;
-	$myplugin = new myplugin;
-	$tables = $wpdb->get_col("
-		SHOW TABLES LIKE '$wpdb->my_plugin_table'
-	");
-
-	error_log(get_bloginfo('name'));
-	error_log($wpdb->prefix);
-	error_log(implode(', ', $tables));
-
-
-	if (!in_array($wpdb->my_plugin_table, $tables)) {
-		$myplugin->install();
-	}
-
-}
-
-myplugin_activate_for_network() seems to work just fine as it runs myplugin_activate() as many times as there are sites. Additionally the get_bloginf( 'name' ) and $wpdb->prefix are producing the correct values for their respective site. However $wpdb->myplugin_table gives me wp_myplugin_table everytime instead of the correct prefix followed by _myplugin_table. I appreciate any insight on this! 
-*/
 ?>
