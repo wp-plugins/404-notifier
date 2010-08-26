@@ -515,8 +515,10 @@ function ak404_request_handler() {
 add_action('admin_init', 'ak404_request_handler', 99);
 
 function ak404_plugin_action_links($links, $file) {
-	if ($file == plugin_basename(N404_FILE)) {
-		$links[] = '<a href="'.esc_url(admin_url('options-general.php?page=404-notifier.php')).'">'.__('Settings').'</a>';
+	$plugin_file = plugin_basename(N404_FILE);
+	if ($file == $plugin_file) {
+		$settings_link = '<a href="'.esc_attr(admin_url('options-general.php?page=404-notifier.php')).'">'.__('Settings', '404-notifier').'</a>';
+		array_unshift($links, $settings_link);
 	}
 	return $links;
 }
