@@ -8,21 +8,19 @@ Author: Crowd Favorite
 Author URI: http://crowdfavorite.com
 */
 
-// Copyright (c) 2006-2010 
-//   Crowd Favorite, Ltd. - http://crowdfavorite.com
-//   Alex King - http://alexking.org
-// All rights reserved.
+// Copyright (c) 2006-2010 Crowd Favorite, Ltd., Alex King. All rights reserved.
 //
 // Released under the GPL license
 // http://www.opensource.org/licenses/gpl-license.php
 //
-// This is an add-on for WordPress - http://wordpress.org
+// This is an add-on for WordPress
+// http://wordpress.org/
 //
 // **********************************************************************
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-// **********************************************************************
+// *****************************************************************
 
 load_plugin_textdomain('404-notifier');
 
