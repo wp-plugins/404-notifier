@@ -29,15 +29,14 @@ load_plugin_textdomain('404-notifier');
 if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier.php');
-	define('N404_HTML_URL', trailingslashit(WP_PLUGIN_URL).'working-html');
-	define('N404_HTML_DIR', trailingslashit(WP_PLUGIN_DIR).'working-html');
 }
 else if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier/404-notifier.php');
-	define('N404_HTML_URL', trailingslashit(WP_PLUGIN_URL).'404-notifier/working-html');
-	define('N404_HTML_DIR', trailingslashit(WP_PLUGIN_DIR).'404-notifier/working-html');
 }
+
+define('CF_TEST_DIR', '404-notifier'); // Used for local testing, comment out in production
+require_once(trailingslashit(dirname(N404_FILE)) . 'admin-ui/cf-admin-ui.php');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
 
@@ -74,9 +73,8 @@ class ak_404 {
 
 	function install() {
 		global $wpdb;
-		$table = ak404_get_cursite_tablename();
 		$result = $wpdb->query("
-			CREATE TABLE `$table` (
+			CREATE TABLE `$wpdb->ak_404_log` (
 			`id` INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 			`url_404` TEXT NOT NULL ,
 			`url_refer` TEXT NULL ,
@@ -297,8 +295,7 @@ class ak_404 {
 	function options_form() {
 		print('
 			<div id="cf" class="wrap">
-				<h2>'.__('404 Notifier Options', '404-notifier').'</h2>');
-		//include (trailingslashit(N404_HTML_DIR) . 'includes/cf-banner.php');
+				<h2>'.__('404 Notifier Settings', '404-notifier').'</h2>');
 		print('	
 				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post" class="cf-form">
 					<fieldset class="lbl-pos-left" >
@@ -327,8 +324,8 @@ class ak_404 {
 				</form>
 			');
 	
-		include (trailingslashit(N404_HTML_DIR) . 'includes/cf-callouts.php');
-		echo '</div>';
+		CF_Admin_UI::cf_callouts();
+		print('</div>');
 	}
 	
 	function rss_feed() {
@@ -411,14 +408,13 @@ if (!function_exists('ak_check_email_address')) {
 	}
 }
 
-function ak404_admin_head() {
-	$cf_styles = trailingslashit(N404_HTML_URL) . 'css/styles.css';
-	$cf_form_elements = trailingslashit(N404_HTML_URL) . 'css/form-elements.css';  
-	echo '<link rel="stylesheet" type="text/css" href="' . $cf_styles . '" />';
-	echo '<link rel="stylesheet" type="text/css" href="' . $cf_form_elements . '" />';
-	
+function ak404_admin_init() {
+	if (is_admin() && $_GET['page'] == basename(__FILE__)) {
+		CF_Admin_UI::cf_load_js();
+		CF_Admin_UI::cf_load_css();
+	}
 }
-add_action('admin_head', 'ak404_admin_head');
+add_action('admin_init', 'ak404_admin_init');
 
 register_activation_hook(N404_FILE, 'ak404_activate');
 function ak404_activate() {
@@ -433,9 +429,8 @@ function ak404_activate() {
 function ak404_activate_single() {
 	global $ak404, $wpdb;
 	$ak404 = new ak_404;
-	$table = ak404_get_cursite_tablename();
 	$tables = $wpdb->get_col("
-		SHOW TABLES LIKE '$table'
+		SHOW TABLES LIKE '$wpdb->ak_404_log'
 	");
 	if (!in_array($table, $tables)) {
 		$ak404->install();
@@ -446,10 +441,6 @@ function ak404_init() {
 	global $ak404;		
 	$ak404 = new ak_404;
 	$ak404->get_settings();
-	if (is_admin()) {
-		wp_enqueue_script('cf_admin_cookie_js', trailingslashit(N404_HTML_URL) . 'js/jquery.cookie.js', array('jquery'));
-		wp_enqueue_script('cf_js_script', trailingslashit(N404_HTML_URL) . 'js/scripts.js', array('jquery'));
-	}
 }
 add_action('init', 'ak404_init');
 
@@ -463,20 +454,20 @@ add_action('shutdown', 'ak404_log');
 
 function ak404_admin_menu() {
 		add_submenu_page(
-			'index.php'
-			, __('404 Notifier Logs', '404-notifier')
-			, __('404 Logs', '404-notifier')
-			, 'manage_options'
-			, basename(N404_FILE)
-			, 'ak404_dashboard_page'
+			'index.php',
+			__('404 Notifier Logs', '404-notifier'),
+			__('404 Logs', '404-notifier'),
+			'manage_options',
+			basename(N404_FILE),
+			'ak404_dashboard_page'
 		);
 
 		add_options_page(
-			__('404 Notifier Options', '404-notifier')
-			, __('404 Notifier', '404-notifier')
-			, 'manage_options'
-			, basename(N404_FILE)
-			, 'ak404_options_form'
+			__('404 Notifier Options', '404-notifier'),
+			__('404 Notifier', '404-notifier'),
+			'manage_options',
+			basename(N404_FILE),
+			'ak404_options_form'
 		);
 
 }
@@ -515,9 +506,9 @@ function ak404_request_handler() {
 add_action('admin_init', 'ak404_request_handler', 99);
 
 function ak404_plugin_action_links($links, $file) {
-	$plugin_file = plugin_basename(N404_FILE);
-	if ($file == $plugin_file) {
-		$settings_link = '<a href="'.esc_attr(admin_url('options-general.php?page=404-notifier.php')).'">'.__('Settings', '404-notifier').'</a>';
+	$plugin_file = basename(__FILE__);
+	if (basename($file) == $plugin_file) {
+		$settings_link = '<a href="options-general.php?page='.$plugin_file.'">'.__('Settings', 'cf-mobile').'</a>';
 		array_unshift($links, $settings_link);
 	}
 	return $links;
@@ -585,17 +576,19 @@ function ak404_activate_for_network() {
 	}
 }
 
-// Hack for wp multisite 
-function ak404_get_cursite_tablename() {
-	global $wpdb;
-	//Probably don't need this if statement
-	if (ak404_is_multisite_and_network_activate()) {		
-		$table = $wpdb->prefix . 'ak_404_log';
-	}
-	else {
-		$table = $wpdb->ak_404_log;
+function ak404_new_blog($blog_id) {
+	if (is_plugin_active_for_network(plugin_basename(N404_FILE))) {
+		switch_to_blog($blog_id);
+		ak404_activate_single();
+		restore_current_blog();
 	}	
-	return $table;
 }
+add_action( 'wpmu_new_blog', 'ak404_new_blog');
+
+function ak404_switch_blog() {
+	global $wpdb;
+	$wpdb->ak_404_log = $wpdb->prefix . 'ak_404_log';
+}
+add_action('switch_blog' , 'ak404_switch_blog');
 
 ?>
