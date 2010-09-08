@@ -26,6 +26,8 @@ Author URI: http://crowdfavorite.com
 
 load_plugin_textdomain('404-notifier');
 
+define('N404_Version', '1.3');
+
 if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier.php')) {
 	define('N404_FILE', trailingslashit(WP_PLUGIN_DIR).'404-notifier.php');
 	define('N404_RELATIVE_FILE', '404-notifier.php');
@@ -206,7 +208,7 @@ class ak_404 {
 		print('
 			<div class="wrap">
 				'.screen_icon().'
-				<h2>'.__('404 Notifier Logs', '404-notifier').'</h2>
+				<h2>'.__('404 Notifier Logs', '404-notifier'). ' ' . CF_ADMIN_UI::cf_support_button('404-Notifier' . N404_Version) .'</h2>
 		');
 
 		$per_page = 20;
@@ -290,18 +292,19 @@ class ak_404 {
 		print('
 			</div>
 		');
+		CF_Admin_UI::cf_callouts();
 	}
 
 	function options_form() {
 		print('
 			<div id="cf" class="wrap">
-				<h2>'.__('404 Notifier Settings', '404-notifier').'</h2>');
+				<h2>'.__('404 Notifier Options', '404-notifier'). ' ' . CF_ADMIN_UI::cf_support_button('404-Notifier' . N404_Version) .'</h2>');
 		print('	
 				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post" class="cf-form">
 					<fieldset class="lbl-pos-left" >
 						<div class="elm-block elm-width-300">
 							<label for="mailto" class="lbl-text">'.__('E-mail address to notify:', '404-notifier').'</label>
-							<input type="text" size="35" name="mailto" id="mailto" value="'.esc_html($this->mailto).'" />
+							<input type="text" class="elm-text" name="mailto" id="mailto" value="'.esc_html($this->mailto).'"  />
 						</div>
 						<div class="elm-block has-checkbox elm-width-300">
 							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" class="elm-checkbox"'.checked($this->mail_enabled, '1', false).'/>
@@ -432,7 +435,7 @@ function ak404_activate_single() {
 	$tables = $wpdb->get_col("
 		SHOW TABLES LIKE '$wpdb->ak_404_log'
 	");
-	if (!in_array($table, $tables)) {
+	if (!in_array($wpdb->ak_404_log, $tables)) {
 		$ak404->install();
 	}
 }
