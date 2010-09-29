@@ -38,7 +38,7 @@ else if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php')
 }
 
 define('CF_TEST_DIR', '404-notifier'); // Used for local testing, comment out in production
-require_once(trailingslashit(dirname(N404_FILE)) . 'admin-ui/cf-admin-ui.php');
+require_once(trailingslashit(dirname(N404_FILE)) . 'admin-ui/cf-admin.php');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
 
@@ -205,11 +205,8 @@ class ak_404 {
 
 	function dashboard_page() {
 		global $wpdb;
-		print('
-			<div class="wrap">
-				'.screen_icon().'
-				<h2>'.__('404 Notifier Logs', '404-notifier'). ' ' . CF_ADMIN_UI::cf_support_button('404-Notifier' . N404_Version) .'</h2>
-		');
+		echo '<div class="wrap">';
+		CF_Admin::cf_admin_header(__('404 Notifier Logs', '404-notifier'),'404-Notifier', N404_Version);
 
 		$per_page = 20;
 		$pagenum = isset($_GET['paged']) ? absint($_GET['paged']) : 0;
@@ -279,26 +276,24 @@ class ak_404 {
 				<td class="date column-date">'.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'</td>
 				</tr>');
 			}
-			echo '</tbody>
-			</table>';
+			print('</tbody>
+			</table>');
 
 			if ($page_links) {
 				echo '<div class="tablenav"><div class="tablenav-pages">'.$page_links_text.'</div><div class="clear"></div></div>';
 			}
 		} else {
-			print('<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>');
+			echo '<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>';
 		}
 
-		print('
-			</div>
-		');
-		CF_Admin_UI::cf_callouts();
+		echo '</div>';
+		CF_Admin::cf_callouts();
 	}
 
 	function options_form() {
-		print('
-			<div id="cf" class="wrap">
-				<h2>'.__('404 Notifier Options', '404-notifier'). ' ' . CF_ADMIN_UI::cf_support_button('404-Notifier' . N404_Version) .'</h2>');
+		echo '<div class="wrap">';
+		CF_Admin::cf_admin_header(__('404 Notifier Options', '404-notifier'), '404-Notifier', N404_Version);
+		
 		print('	
 				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post" class="cf-form">
 					<fieldset class="lbl-pos-left" >
@@ -327,8 +322,8 @@ class ak_404 {
 				</form>
 			');
 	
-		CF_Admin_UI::cf_callouts();
-		print('</div>');
+		CF_Admin::cf_callouts();
+		echo '</div>';
 	}
 	
 	function rss_feed() {
@@ -413,8 +408,8 @@ if (!function_exists('ak_check_email_address')) {
 
 function ak404_admin_init() {
 	if (is_admin() && $_GET['page'] == basename(__FILE__)) {
-		CF_Admin_UI::cf_load_js();
-		CF_Admin_UI::cf_load_css();
+		CF_Admin::cf_load_js();
+		CF_Admin::cf_load_css();
 	}
 }
 add_action('admin_init', 'ak404_admin_init');
@@ -472,7 +467,6 @@ function ak404_admin_menu() {
 			basename(N404_FILE),
 			'ak404_options_form'
 		);
-
 }
 add_action('admin_menu', 'ak404_admin_menu');
 
@@ -491,7 +485,9 @@ function ak404_request_handler() {
 	if (!empty($_POST['ak_action'])) {
 		switch($_POST['ak_action']) {
 			case 'update_404_settings': 
-				check_admin_referer('404-notifier');
+				if (!check_admin_referer('404-notifier')) {
+					die();
+				}
 				$ak404->update_settings();
 				header('Location: '.admin_url('options-general.php?page=404-notifier.php&updated=true'));
 				die();
