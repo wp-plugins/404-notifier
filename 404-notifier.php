@@ -546,41 +546,16 @@ function ak404_add_dashboard_widgets() {
 add_action('wp_dashboard_setup', 'ak404_add_dashboard_widgets');
 
 //Multisite utility and integration functions 
-function ak404_get_site_blogs() {
-	global $wpdb;
-	return $wpdb->get_col( "
-		SELECT blog_id
-		FROM $wpdb->blogs
-		WHERE site_id = '{$wpdb->siteid}'
-		AND deleted = 0
-	");
-}
-
 function ak404_is_multisite_and_network_activate() {
-	if (function_exists('is_multisite') && is_multisite() &&
-		isset($_GET['networkwide']) && ($_GET['networkwide'] == 1)) {
-			return true;
-	}
-	else {
-		return false;
-	}		
+	return CF_Admin::cf_is_multisite_and_network_activation();		
 }
 
 function ak404_activate_for_network() {
-	$blogs = ak404_get_site_blogs();
-	foreach ($blogs as $blog_id) {
-		switch_to_blog($blog_id);
-		ak404_activate_single();
-		restore_current_blog();
-	}
+	CF_Admin::cf_activate_for_network('ak404_activate_single');
 }
 
 function ak404_new_blog($blog_id) {
-	if (is_plugin_active_for_network(plugin_basename(N404_FILE))) {
-		switch_to_blog($blog_id);
-		ak404_activate_single();
-		restore_current_blog();
-	}	
+	CF_Admin::cf_new_blog(N404_FILE, $blog_id);
 }
 add_action( 'wpmu_new_blog', 'ak404_new_blog');
 
