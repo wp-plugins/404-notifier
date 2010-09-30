@@ -38,7 +38,7 @@ else if (is_file(trailingslashit(WP_PLUGIN_DIR).'404-notifier/404-notifier.php')
 }
 
 define('CF_TEST_DIR', '404-notifier'); // Used for local testing, comment out in production
-require_once(trailingslashit(dirname(N404_FILE)) . 'admin-ui/cf-admin.php');
+require_once(trailingslashit(dirname(N404_FILE)) . 'cf-admin/cf-admin.php');
 
 $_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
 
