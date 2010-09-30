@@ -240,43 +240,48 @@ class ak_404 {
 				echo $page_links_text.'</div><div class="clear"></div></div>';
 			}
 
-			echo '<table class="widefat post fixed" cellspacing="0">
-			<thead>
-				<tr>
-					<th scope="col" id="url" class="manage-column column-url">'.__('404 URL', '404-notifier').'</th>
-					<th scope="col" id="refer" class="manage-column column-refer">'.__('Referring URL', '404-notifier').'</th>
-					<th scope="col" id="address" class="manage-column column-address">'.__('Remote Address', '404-notifier').'</th>
-					<th scope="col" id="host" class="manage-column column-host">'.__('Remote Host', '404-notifier').'</th>
-					<th scope="col" id="agent" class="manage-column column-agent">'.__('User Agent', '404-notifier').'</th>
-					<th scope="col" id="date" class="manage-column column-date">'.__('Date', '404-notifier').'</th>
-				</tr>
-			</thead>
+			echo('
+			<table class="widefat post fixed" cellspacing="0">
+				<thead>
+					<tr>
+						<th scope="col" id="url" class="manage-column column-url">'.__('404 URL', '404-notifier').'</th>
+						<th scope="col" id="refer" class="manage-column column-refer">'.__('Referring URL', '404-notifier').'</th>
+						<th scope="col" id="address" class="manage-column column-address">'.__('Remote Address', '404-notifier').'</th>
+						<th scope="col" id="host" class="manage-column column-host">'.__('Remote Host', '404-notifier').'</th>
+						<th scope="col" id="agent" class="manage-column column-agent">'.__('User Agent', '404-notifier').'</th>
+						<th scope="col" id="date" class="manage-column column-date">'.__('Date', '404-notifier').'</th>
+					</tr>
+				</thead>
 
-			<tfoot>
-				<tr>
-					<th scope="col" class="manage-column column-url">'.__('404 URL', '404-notifier').'</th>
-					<th scope="col" class="manage-column column-refer">'.__('Referring URL', '404-notifier').'</th>
-					<th scope="col" class="manage-column column-address">'.__('Remote Address', '404-notifier').'</th>
-					<th scope="col" class="manage-column column-host">'.__('Remote Host', '404-notifier').'</th>
-					<th scope="col" class="manage-column column-agent">'.__('User Agent', '404-notifier').'</th>
-					<th scope="col" class="manage-column column-date">'.__('Date', '404-notifier').'</th>
-				</tr>
-			</tfoot>
+				<tfoot>
+					<tr>
+						<th scope="col" class="manage-column column-url">'.__('404 URL', '404-notifier').'</th>
+						<th scope="col" class="manage-column column-refer">'.__('Referring URL', '404-notifier').'</th>
+						<th scope="col" class="manage-column column-address">'.__('Remote Address', '404-notifier').'</th>
+						<th scope="col" class="manage-column column-host">'.__('Remote Host', '404-notifier').'</th>
+						<th scope="col" class="manage-column column-agent">'.__('User Agent', '404-notifier').'</th>
+						<th scope="col" class="manage-column column-date">'.__('Date', '404-notifier').'</th>
+					</tr>
+				</tfoot>
 
-			<tbody>';
+				<tbody>
+				');
 			$rowclass = ' class="alternate"';
 			foreach ($events as $event) {
 				$rowclass = ' class="alternate"' == $rowclass ? '' : ' class="alternate"';
-				print('<tr id="log-'.absint($event->id).'"'.$rowclass.' valign="top">
-				<td class="url column-url"><strong><a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a></strong></td>
-				<td class="refer column-refer">'.(isset($event->url_refer) && !empty($event->url_refer) ? '<a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a>' : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
-				<td class="address column-address">'.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
-				<td class="host column-host">'.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
-				<td class="agent column-agent">'.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
-				<td class="date column-date">'.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'</td>
-				</tr>');
+				echo('
+				<tr id="log-'.absint($event->id).'"'.$rowclass.' valign="top">
+					<td class="url column-url"><strong><a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a></strong></td>
+					<td class="refer column-refer">'.(isset($event->url_refer) && !empty($event->url_refer) ? '<a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a>' : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
+					<td class="address column-address">'.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
+					<td class="host column-host">'.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
+					<td class="agent column-agent">'.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
+					<td class="date column-date">'.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'</td>
+				</tr>
+					');
 			}
-			print('</tbody>
+			echo('
+				</tbody>
 			</table>');
 
 			if ($page_links) {
@@ -344,7 +349,7 @@ class ak_404 {
 >
 
 <channel>
-	<title><?php print(__('404 Report for: ', '404-notifier')); bloginfo_rss('name'); ?></title>
+	<title><?php echo(__('404 Report for: ', '404-notifier')); bloginfo_rss('name'); ?></title>
 	<link><?php bloginfo_rss('url') ?></link>
 	<description><?php bloginfo_rss("description") ?></description>
 	<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></pubDate>
@@ -360,12 +365,12 @@ class ak_404 {
 				';
 ?>
 	<item>
-		<title><![CDATA[<?php print('404: '.htmlspecialchars($event->url_404)); ?>]]></title>
-		<link><![CDATA[<?php print($event->url_404); ?>]]></link>
+		<title><![CDATA[<?php echo('404: '.htmlspecialchars($event->url_404)); ?>]]></title>
+		<link><![CDATA[<?php echo($event->url_404); ?>]]></link>
 		<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false); ?></pubDate>
 		<guid isPermaLink="false"><?php print($event->id); ?></guid>
-		<description><![CDATA[<?php print($content); ?>]]></description>
-		<content:encoded><![CDATA[<?php print($content); ?>]]></content:encoded>
+		<description><![CDATA[<?php echo($content); ?>]]></description>
+		<content:encoded><![CDATA[<?php echo($content); ?>]]></content:encoded>
 	</item>
 <?php $items_count++; if (($items_count == get_option('posts_per_rss')) && !is_date()) { break; } } } ?>
 </channel>
@@ -525,19 +530,23 @@ function ak404_main_dashboard_widget() {
 	if (count($events) > 0) {
 		echo '<ul>';
 		foreach ($events as $event) {
-			print('<li>
-			<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a><br/>
-			<strong>'.__('Referring URL:', '404-notifier').'</strong> '.(isset($event->url_refer) && !empty($event->url_refer) ? '<a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a>' : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
-			<strong>'.__('Remote Address:', '404-notifier').'</strong> '.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
-			<strong>'.__('Remote Host:', '404-notifier').'</strong> '.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
-			<strong>'.__('User Agent:', '404-notifier').'</strong> '.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
-			<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
-			</li>');
+			echo('
+			<li>
+				<strong>'.__('404 URL:', '404-notifier').'</strong> <a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a><br/>
+				<strong>'.__('Referring URL:', '404-notifier').'</strong> '.(isset($event->url_refer) && !empty($event->url_refer) ? '<a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a>' : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
+				<strong>'.__('Remote Address:', '404-notifier').'</strong> '.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
+				<strong>'.__('Remote Host:', '404-notifier').'</strong> '.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
+				<strong>'.__('User Agent:', '404-notifier').'</strong> '.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
+				<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
+			</li>
+				');
 		}
-		echo '</ul>
-		<p class="textright"><a href="'.esc_url(admin_url('index.php?page=404-notifier.php')).'" class="button">'.__('View all').'</a></p>';
+		echo('
+			</ul>
+				<p class="textright"><a href="'.esc_url(admin_url('index.php?page=404-notifier.php')).'" class="button">'.__('View all').'</a></p>
+			');
 	} else {
-		print('<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>');
+		echo '<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>';
 	}
 }
 function ak404_add_dashboard_widgets() {
@@ -555,7 +564,7 @@ function ak404_activate_for_network() {
 }
 
 function ak404_new_blog($blog_id) {
-	CF_Admin::cf_new_blog(N404_FILE, $blog_id);
+	CF_Admin::cf_new_blog(N404_FILE, $blog_id, 'ak404_activate_single');
 }
 add_action( 'wpmu_new_blog', 'ak404_new_blog');
 
