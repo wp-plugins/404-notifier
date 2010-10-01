@@ -301,20 +301,20 @@ class ak_404 {
 		
 		print('	
 				<form name="ak_404" action="'.esc_url(admin_url('options-general.php')).'" method="post" class="cf-form">
-					<fieldset class="lbl-pos-left" >
-						<div class="elm-block elm-width-300">
-							<label for="mailto" class="lbl-text">'.__('E-mail address to notify:', '404-notifier').'</label>
-							<input type="text" class="elm-text" name="mailto" id="mailto" value="'.esc_html($this->mailto).'"  />
+					<fieldset class="cf-lbl-pos-left" >
+						<div class="cf-elm-block elm-width-300">
+							<label for="mailto" class="cf-lbl-text">'.__('E-mail address to notify:', '404-notifier').'</label>
+							<input type="text" class="cf-elm-text" name="mailto" id="mailto" value="'.esc_html($this->mailto).'"  />
 						</div>
-						<div class="elm-block has-checkbox elm-width-300">
-							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" class="elm-checkbox"'.checked($this->mail_enabled, '1', false).'/>
-							<label for="ak404_mail_enabled" class="lbl-checkbox">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
+						<div class="cf-elm-block cf-has-checkbox">
+							<input type="checkbox" name="mail_enabled" id="ak404_mail_enabled" value="1" class="cf-elm-checkbox"'.checked($this->mail_enabled, '1', false).'/>
+							<label for="ak404_mail_enabled" class="cf-lbl-checkbox">'.__('Enable mail notifications on 404 hits.', '404-notifier').'</label>
 						</div>
-						<div class="elm-block elm-width-50">
-							<label for="rss_limit" class="lbl-text">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
-							<input type="text" name="rss_limit" id="rss_limit" class="elm-text" value="'.intval($this->rss_limit).'" />
+						<div class="cf-elm-block cf-elm-width-50">
+							<label for="rss_limit" class="cf-lbl-text">'.__('Limit the RSS Feed to how many items?', '404-notifier').'</label>
+							<input type="text" name="rss_limit" id="rss_limit" class="cf-elm-text" value="'.intval($this->rss_limit).'" />
 						</div>
-						<div class="elm-block elm-width-300">
+						<div class="cf-elm-block cf-elm-width-300">
 							<a href="'.esc_url(admin_url('options-general.php?ak_action=404_feed')).'">'.__('RSS Feed of 404 Events', '404-notifier').'</a>
 						</div>
 						<input type="hidden" name="ak_action" value="update_404_settings"/>
