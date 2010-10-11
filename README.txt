@@ -7,16 +7,17 @@ Stable tag: 1.3
 
 Log 404 (file not found) errors on your site and get them delivered to you via e-mail or RSS.
 
+
 == Description ==
 
 If you've decided to move things around on your site, you might overlook a few redirects and end up with some broken URLs. This will help you catch those so you can take care of them.
+
 
 == Installation == 
 
 1. Upload the 404-notifier directory to your wp-content/plugins directory.
 2. Go to the Plugins page in your WordPress Administration area and click 'Activate' for 404 Notifier. This will create the 404 log table for you.
 
-Congratulations, you've just installed 404 Notifier.
 
 == Frequently Asked Questions ==  
 
@@ -31,6 +32,7 @@ Yes, your 404 logs will be blog specific.
 = Anything else? =
 
 That about does it - enjoy!
+
 
 == Changelog ==
 
