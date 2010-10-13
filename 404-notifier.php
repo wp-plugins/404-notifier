@@ -113,7 +113,7 @@ class ak_404 {
 		if (!in_array('remote_host', $cols)) {
 			$wpdb->query("
 				ALTER TABLE `$wpdb->ak_404_log`
-				ADD `remote_host` TEXT DEFAULT NULL
+				ADD `remote_host` VARCHAR(255) DEFAULT NULL
 				AFTER `remote_addr`
 			");
 		}
@@ -278,13 +278,13 @@ class ak_404 {
 			foreach ($events as $event) {
 				$rowclass = ' class="alternate"' == $rowclass ? '' : ' class="alternate"';
 				echo('
-			<tr id="log-'.absint($event->id).'"'.$rowclass.' valign="top">
+			<tr id="'.esc_attr('log-'.$event->id).'"'.$rowclass.' valign="top">
 				<td class="url column-url"><strong><a href="'.esc_url($event->url_404).'">'.esc_html($event->url_404).'</a></strong></td>
 				<td class="refer column-refer">'.(isset($event->url_refer) && !empty($event->url_refer) ? '<a href="'.esc_url($event->url_refer).'">'.esc_html($event->url_refer).'</a>' : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
 				<td class="address column-address">'.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
 				<td class="host column-host">'.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
 				<td class="agent column-agent">'.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'</td>
-				<td class="date column-date">'.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'</td>
+				<td class="date column-date">'.esc_html(mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false)).'</td>
 			</tr>
 				');
 			}
@@ -376,7 +376,7 @@ class ak_404 {
 				$content = '
 					<p>'.__('404 URL: ', '404-notifier').'<a href="'.esc_url($event->url_404).'">'.esc_url($event->url_404).'</a></p>
 					<p>'.__('Referring URL: ', '404-notifier').'<a href="'.esc_url($event->url_refer).'">'.esc_url($event->url_refer).'</a></p>
-					<p>'.__('User Agent: ', '404-notifier').$event->user_agent.'</p>
+					<p>'.__('User Agent: ', '404-notifier').esc_html($event->user_agent).'</p>
 				';
 ?>
 	<item>
@@ -384,7 +384,7 @@ class ak_404 {
 		<link><![CDATA[<?php echo(esc_url($event->url_404)); ?>]]></link>
 		<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false); ?></pubDate>
 		<guid isPermaLink="false"><?php print($event->id); ?></guid>
-		<description><![CDATA[<?php echo($content); ?>]]></description>
+		<description><![CDATA[<?php echo(strip_tags($content)); ?>]]></description>
 		<content:encoded><![CDATA[<?php echo($content); ?>]]></content:encoded>
 	</item>
 <?php $items_count++; if (($items_count == get_option('posts_per_rss')) && !is_date()) { break; } } } ?>
@@ -394,7 +394,6 @@ class ak_404 {
 		die();
 	}
 }
-
 
 if (!function_exists('ak_check_email_address')) {
 	function ak_check_email_address($email) {
@@ -462,33 +461,36 @@ function ak404_init() {
 	$ak404 = new ak_404;
 	$ak404->get_settings();
 }
-add_action('init', 'ak404_init');
+add_action('admin_init', 'ak404_init');
 
 function ak404_log() {
 	if (is_404()) {
 		global $ak404;
+		if (!is_a($ak404, 'ak404')) {
+			$ak404 = new ak404;
+		}
 		$ak404->log_404();
 	}
 }
 add_action('shutdown', 'ak404_log');
 
 function ak404_admin_menu() {
-		add_submenu_page(
-			'index.php',
-			__('404 Notifier Logs', '404-notifier'),
-			__('404 Logs', '404-notifier'),
-			'manage_options',
-			basename(N404_FILE),
-			'ak404_dashboard_page'
-		);
+	add_submenu_page(
+		'index.php',
+		__('404 Notifier Logs', '404-notifier'),
+		__('404 Logs', '404-notifier'),
+		'manage_options',
+		basename(N404_FILE),
+		'ak404_dashboard_page'
+	);
 
-		add_options_page(
-			__('404 Notifier Options', '404-notifier'),
-			__('404 Notifier', '404-notifier'),
-			'manage_options',
-			basename(N404_FILE),
-			'ak404_options_form'
-		);
+	add_options_page(
+		__('404 Notifier Options', '404-notifier'),
+		__('404 Notifier', '404-notifier'),
+		'manage_options',
+		basename(N404_FILE),
+		'ak404_options_form'
+	);
 }
 add_action('admin_menu', 'ak404_admin_menu');
 
@@ -511,7 +513,7 @@ function ak404_request_handler() {
 					die();
 				}
 				$ak404->update_settings();
-				header('Location: '.admin_url('options-general.php?page=404-notifier.php&updated=true'));
+				header('Location: '.admin_url('options-general.php?page='.N404_FILE.'&updated=true'));
 				die();
 				break;
 		}
@@ -549,7 +551,7 @@ function ak404_main_dashboard_widget() {
 		<strong>'.__('Remote Address:', '404-notifier').'</strong> '.(isset($event->remote_addr) && !empty($event->remote_addr) ? esc_html($event->remote_addr) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
 		<strong>'.__('Remote Host:', '404-notifier').'</strong> '.(isset($event->remote_host) && !empty($event->remote_host) ? esc_html($event->remote_host) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
 		<strong>'.__('User Agent:', '404-notifier').'</strong> '.(isset($event->user_agent) && !empty($event->user_agent) ? esc_html($event->user_agent) : '<span class="nonessential">'.__('N/A', '404-notifier').'</span>').'<br/>
-		<strong>'.__('Date:', '404-notifier').'</strong> '.mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false).'
+		<strong>'.__('Date:', '404-notifier').'</strong> '.esc_html(mysql2date('D, d M Y H:i:s +0000', $event->date_gmt, false)).'
 	</li>
 			');
 		}
@@ -557,7 +559,8 @@ function ak404_main_dashboard_widget() {
 </ul>
 <p class="textright"><a href="'.esc_url(admin_url('index.php?page=404-notifier.php')).'" class="button">'.__('View all').'</a></p>
 		');
-	} else {
+	}
+	else {
 		echo '<p><em>'.__('No logs to display&hellip;', '404-notifier').'</em></p>';
 	}
 }
