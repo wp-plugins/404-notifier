@@ -125,6 +125,7 @@ class ak_404 {
 		if (!current_user_can('manage_options')) {
 			return;
 		}
+		$options_arr = array();
 		foreach ($this->options as $option => $type) {
 			if (isset($_POST[$option])) {
 				switch ($type) {
@@ -140,18 +141,25 @@ class ak_404 {
 					default:
 						$value = stripslashes($_POST[$option]);
 				}
-				update_option('ak404_'.$option, $value);
+				$options_arr['ak404_'.$option] .= $value;
 			}
 			else {
-				update_option('ak404_'.$option, $this->$option);
+				$options_arr['ak404_'.$option] .= $this->options;				
 			}
 		}
+		update_option('ak404_options', serialize($options_arr));
 		$this->upgrade();
 	}
 
 	function get_settings() {
+		$settings = unserialize(get_option('ak404_options'));
 		foreach ($this->options as $option => $type) {
-			$this->$option = get_option('ak404_'.$option);
+			if (empty($settings)) {
+				$this->$option = get_option('ak404_'.$option);
+			}
+			else {
+				$this->$option = $settings['ak404_'.$option];
+			}
 			switch ($type) {
 				case 'email':
 					$this->$option = $this->$option;
