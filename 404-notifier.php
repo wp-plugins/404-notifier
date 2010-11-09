@@ -206,7 +206,6 @@ class ak_404 {
 	}
 
 	function mail_404() {
-		error_log('mail '.$this->remote_addr);
 		if (!empty($this->mailto) && $this->mail_enabled){//} && !$this->surpress_notification()) {
 			$to      = esc_html($this->mailto);
 			$subject = __('404: ', '404-notifier').esc_html($this->url_404);
@@ -489,9 +488,7 @@ function ak404_log() {
 		if (!is_a($ak404, 'ak_404')) {
 			$ak404 = new ak_404;
 		}
-		error_log('remote addr '.$ak404->remote_addr);
 		$ak404->log_404();
-		
 	}
 }
 add_action('shutdown', 'ak404_log');
