@@ -1,9 +1,9 @@
 === 404 Notifier ===
 Tags: 404, error, log, notify
 Contributors: alexkingorg
-Requires at least: 1.5
-Tested up to: 2.5
-Stable tag: 1.2a
+Requires at least: 3.6
+Tested up to: 3.6
+Stable tag: 1.3
 
 Log 404 (file not found) errors on your site and get them delivered to you via e-mail or RSS.
 
@@ -34,3 +34,14 @@ That about does it - enjoy!
 --Alex King
 
 http://alexking.org/projects/wordpress
+
+== Upgrade Notice ==
+
+= 1.3 =
+
+WordPress 3.6 compatibility.
+
+== Changelog ==
+
+= 1.3 =
+* update deprecated calls
